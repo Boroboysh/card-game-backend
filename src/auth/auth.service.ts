@@ -15,7 +15,7 @@ export class AuthService {
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email);
 
-    if (!user || user.password !== password) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new CustomErrorException(AuthErrorCodes.INVALID_CREDENTIALS, 'Invalid email or password', 401);
     }
 
