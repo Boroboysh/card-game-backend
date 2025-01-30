@@ -14,12 +14,20 @@ datasource db {
 }
 
 model User {
-  id        String  @id @default(uuid())
-  username  String  @unique
-  email     String  @unique
-  password  String
-  createdAt DateTime @default(now())
+  id             String  @id @default(uuid())
+  username       String  @unique
+  email          String  @unique
+  password       String
   decks     Deck[]
+  createdAt DateTime @default(now())
+  mmr            Int     @default(1000) // Рейтинг игрока
+  ping           Int     @default(50)   // Средний пинг
+  winRate        Float   @default(50.0) // Винрейт %
+  playStyle      String  @default("balanced") // Агрессивный, защитный, сбалансированный
+  matchHistory   Json    @default("[]") // История матчей (JSON-массив)
+  winTiming      Float   @default(0.0) // Среднее время побед
+  loseTiming     Float   @default(0.0) // Среднее время поражений
+  reports        Int     @default(0)   // Количество жалоб от других игроков
 }
 
 model Admin {
