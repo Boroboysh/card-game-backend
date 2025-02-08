@@ -13,6 +13,7 @@ export class MatchmakingGateway implements OnGatewayDisconnect {
   constructor(private jwtService: JwtService) {}
 
   emitMatchFound(battleId: string, players: any[]) {
+    // curent format battleId - `battle_${player.id}_${opponent.id}`
     this.server.emit('match_found', { battleId, players });
   }
 

@@ -16,18 +16,23 @@ async function findMatchForPlayer(player) {
   let mmrRange = Math.floor(player.mmr / 200) * 200;
   let queueKey = `matchmaking:mmr:${mmrRange}`;
 
-  let candidates = await redisClient.zRange(queueKey, 0, -1, { withScores: true });
+  let candidates = await redisClient.zRange(queueKey, 0, -1);
 
   if (candidates.length === 0) {
     // Расширяем поиск, если кандидатов нет (ищем в соседних MMR-диапазонах)
     mmrRange += 200;
     queueKey = `matchmaking:mmr:${mmrRange}`;
-    candidates = await redisClient.zRange(queueKey, 0, -1, { withScores: true });
+
+    // { withScores: true }
+    candidates = await redisClient.zRange(queueKey, 0, -1);
   }
 
   for (const candidate of candidates) {
     const opponent = JSON.parse(candidate.value);
-    if (opponent.id === player.id) continue;
+
+    if (opponent.id === player.id) {
+      continue;
+    }
 
     const searchTime = (Date.now() - player.joinedAt) / 1000;
     const score = calculateMatchScore(player, opponent, searchTime);

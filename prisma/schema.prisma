@@ -19,6 +19,7 @@ model User {
   email          String  @unique
   password       String
   decks     Deck[]
+  activeDeck   String?
   createdAt DateTime @default(now())
   mmr            Int     @default(1000) // Рейтинг игрока
   ping           Int     @default(50)   // Средний пинг
@@ -28,6 +29,11 @@ model User {
   winTiming      Float   @default(0.0) // Среднее время побед
   loseTiming     Float   @default(0.0) // Среднее время поражений
   reports        Int     @default(0)   // Количество жалоб от других игроков
+
+  // Связь с матчами
+  matchesAsPlayer1 Match[] @relation("MatchPlayer1")
+  matchesAsPlayer2 Match[] @relation("MatchPlayer2")
+  matchesWon       Match[] @relation("MatchWinner")
 }
 
 model Admin {
@@ -69,4 +75,25 @@ model DeckOnCard {
   card    Card  @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
   @@id([deckId, cardId])
+}
+
+model Match {
+  id           String   @id @default(uuid())
+  player1      User     @relation("MatchPlayer1", fields: [player1Id], references: [id])
+  player1Id    String
+  player2      User     @relation("MatchPlayer2", fields: [player2Id], references: [id])
+  player2Id    String
+  rounds       Json     @default("[]")
+  currentRound Int      @default(1)
+  activePlayer String
+  isFinished   Boolean  @default(false)
+  winner       User?    @relation("MatchWinner", fields: [winnerId], references: [id])
+  winnerId     String?
+
+  player1Hand  Json     @default("[]") // Карты в руке первого игрока
+  player2Hand  Json     @default("[]") // Карты в руке второго игрока
+  player1AP    Int      @default(100)  // Очки действий первого игрока
+  player2AP    Int      @default(100)  // Очки действий второго игрока
+
+  createdAt    DateTime @default(now())
 }

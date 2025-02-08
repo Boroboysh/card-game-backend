@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { CustomErrorException } from '../common/custom-error.exception';
-import { DeckErrorCodes } from '../common/error-codes';
+import { CustomErrorException } from '../errors/custom-error.exception';
+import { DeckErrorCodes } from '../errors/error-codes';
 
 @Injectable()
 export class DecksService {

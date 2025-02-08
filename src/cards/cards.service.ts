@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { CustomErrorException } from '../common/custom-error.exception';
-import { CardErrorCodes } from '../common/error-codes';
+import { CustomErrorException } from '../errors/custom-error.exception';
+import { CardErrorCodes } from '../errors/error-codes';
 
 @Injectable()
 export class CardsService {
@@ -46,5 +46,4 @@ export class CardsService {
       },
     });
   }
-
 }

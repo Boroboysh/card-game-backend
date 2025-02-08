@@ -8,14 +8,14 @@ interface AuthenticatedRequest extends Request {
 }
 
 @Controller('decks')
-@UseGuards(JwtAuthGuard) // ✅ Защищаем API колод JWT-аутентификацией
+@UseGuards(JwtAuthGuard)
 export class DecksController {
   constructor(private readonly decksService: DecksService) {}
 
   @Post()
   async createDeck(@Req() req: AuthenticatedRequest, @Body() body: { name: string; cardIds: string[] }) {
     if (!req.user || !req.user.sub) {
-      throw new Error('User ID not found in request'); // ✅ Логируем ошибку
+      throw new Error('User ID not found in request');
     }
     return this.decksService.createDeck(req.user.sub, body.name, body.cardIds);
   }
@@ -23,7 +23,7 @@ export class DecksController {
   @Get()
   async getUserDecks(@Req() req: AuthenticatedRequest) {
     if (!req.user || !req.user.sub) {
-      throw new Error('User ID not found in request'); // ✅ Логируем ошибку
+      throw new Error('User ID not found in request')
     }
     return this.decksService.getUserDecks(req.user.sub);
   }

@@ -2,8 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { CustomErrorException } from '../common/custom-error.exception';
-import { AuthErrorCodes } from '../common/error-codes';
+import { CustomErrorException } from '../errors/custom-error.exception';
+import { AuthErrorCodes } from '../errors/error-codes';
 
 @Injectable()
 export class AuthService {

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import * as bcrypt from 'bcrypt';
-import { CustomErrorException } from '../common/custom-error.exception';
-import { AuthErrorCodes } from '../common/error-codes';
+import { CustomErrorException } from '../errors/custom-error.exception';
+import { AuthErrorCodes, DeckErrorCodes } from '../errors/error-codes';
 
 @Injectable()
 export class UsersService {
@@ -28,5 +28,23 @@ export class UsersService {
 
   async findById(id: string) {
     return this.prisma.user.findUnique({ where: { id } });
+  }
+
+  async setActiveDeck(userId: string, deckId: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { activeDeck: deckId },
+    });
+  }
+
+  async getActiveDeck(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { activeDeck: true },
+    });
+    if (!user || !user.activeDeck) {
+      throw new CustomErrorException(DeckErrorCodes.NOT_FOUND, 'Active deck not found');
+    }
+    return user.activeDeck;
   }
 }
