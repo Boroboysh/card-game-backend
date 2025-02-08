@@ -1,13 +1,18 @@
 import { redisClient } from '../config/redis.config';
 import { calculateMatchScore } from './matchmaking.utils';
 import { MatchmakingGateway } from './matchmaking.gateway';
-import { removePlayerFromQueue } from './matchmaking.queue';
 import { MATCHMAKING_THRESHOLD } from './matchmaking.constants';
+import { MatchmakingService } from './matchmaking.service';
 
 let gateway: MatchmakingGateway;
+let matchmakingService: MatchmakingService;
 
 export function setMatchmakingGateway(instance: MatchmakingGateway) {
   gateway = instance;
+}
+
+export function setMatchmakingService(instance: MatchmakingService) {
+  matchmakingService = instance;
 }
 
 const subscriber = redisClient.duplicate();
@@ -28,7 +33,7 @@ async function findMatchForPlayer(player) {
   }
 
   for (const candidate of candidates) {
-    const opponent = JSON.parse(candidate.value);
+    const opponent = JSON.parse(candidate);
 
     if (opponent.id === player.id) {
       continue;
@@ -37,11 +42,13 @@ async function findMatchForPlayer(player) {
     const searchTime = (Date.now() - player.joinedAt) / 1000;
     const score = calculateMatchScore(player, opponent, searchTime);
 
+    console.log('score', score);
+
     if (score > MATCHMAKING_THRESHOLD) {
       const battleId = `battle_${player.id}_${opponent.id}`;
 
-      await removePlayerFromQueue(player.id);
-      await removePlayerFromQueue(opponent.id);
+      await matchmakingService.removePlayerFromQueue(player.id);
+      await matchmakingService.removePlayerFromQueue(opponent.id);
 
       gateway.emitMatchFound(battleId, [player, opponent]);
 

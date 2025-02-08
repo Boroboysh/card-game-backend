@@ -22,6 +22,17 @@ export function calculateMatchScore(playerA: any, playerB: any, searchTime: numb
   const historyPenalty = playerA.matchHistory.includes(playerB.id) ? PENALTIES.matchHistoryPenalty : 0;
   const reportPenalty = playerB.reports * PENALTIES.reportPenaltyFactor;
 
+  console.log(
+    'mmrDiff pingDiff winRateDiff playStyleDiff historyPenaltyreportPenalty',
+
+    mmrDiff,
+    pingDiff,
+    winRateDiff,
+    playStyleDiff,
+    historyPenalty,
+    reportPenalty,
+  );
+
   const score =
     100 -
     (mmrDiff * (100 - weights.mmr)) / 100 -
