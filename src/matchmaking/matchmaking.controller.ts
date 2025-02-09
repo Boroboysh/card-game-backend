@@ -1,7 +1,7 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { CustomErrorException } from '../errors/custom-error.exception';
 import { GameErrorCodes } from '../errors/error-codes';
-import { MatchmakingPlayerData } from '../types/matchmaking';
+import { MatchmakingPlayerData } from './types/matchmaking.type';
 import { MatchmakingService } from './matchmaking.service';
 
 @Controller('battle')

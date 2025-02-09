@@ -1,8 +1,9 @@
 import { redisClient } from '../config/redis.config';
 import { calculateMatchScore } from './matchmaking.utils';
 import { MatchmakingGateway } from './matchmaking.gateway';
-import { MATCHMAKING_THRESHOLD } from './matchmaking.constants';
+import { MATCHMAKING_THRESHOLD, MMR_STEP } from './matchmaking.constants';
 import { MatchmakingService } from './matchmaking.service';
+import { MatchmakingRedisKeys } from './types/redis-keys.enum';
 
 let gateway: MatchmakingGateway;
 let matchmakingService: MatchmakingService;
@@ -17,16 +18,17 @@ export function setMatchmakingService(instance: MatchmakingService) {
 
 const subscriber = redisClient.duplicate();
 
+//todo player type
 async function findMatchForPlayer(player) {
-  let mmrRange = Math.floor(player.mmr / 200) * 200;
-  let queueKey = `matchmaking:mmr:${mmrRange}`;
+  let mmrRange = Math.floor(player.mmr / MMR_STEP) * MMR_STEP;
+  let queueKey = `${MatchmakingRedisKeys.MATCHMAKING_MMR}${mmrRange}`;
 
   let candidates = await redisClient.zRange(queueKey, 0, -1);
 
   if (candidates.length === 0) {
     // Расширяем поиск, если кандидатов нет (ищем в соседних MMR-диапазонах)
-    mmrRange += 200;
-    queueKey = `matchmaking:mmr:${mmrRange}`;
+    mmrRange += MMR_STEP;
+    queueKey = `${MatchmakingRedisKeys.MATCHMAKING_MMR}${mmrRange}`;
 
     // { withScores: true }
     candidates = await redisClient.zRange(queueKey, 0, -1);
@@ -47,13 +49,24 @@ async function findMatchForPlayer(player) {
     if (score > MATCHMAKING_THRESHOLD) {
       const battleId = `battle_${player.id}_${opponent.id}`;
 
-      await matchmakingService.removePlayerFromQueue(player.id);
-      await matchmakingService.removePlayerFromQueue(opponent.id);
+      const inactivePlayers = await matchmakingService.checkOfflinePlayers(player.id, opponent.id);
 
-      gateway.emitMatchFound(battleId, [player, opponent]);
+      if (inactivePlayers.length === 0) {
+        // Оба игрока подтвердили активность → удаляем из очереди и запускаем матч
+        await matchmakingService.removePlayerFromQueue(player.id);
+        await matchmakingService.removePlayerFromQueue(opponent.id);
 
-      console.log(`🎯 Match found: ${battleId}`);
-      return;
+        gateway.emitMatchFound(battleId, [player, opponent]);
+
+        console.log(`🎯 Match found: ${battleId}`);
+      }  else {
+        console.log(`Один или оба игрока offline, матч отменён`);
+
+        // Удаляем AFK-игроков из очереди
+        for (const afkPlayer of inactivePlayers) {
+          await matchmakingService.removePlayerFromQueue(afkPlayer);
+        }
+      }
     }
   }
 }
@@ -61,7 +74,7 @@ async function findMatchForPlayer(player) {
 
 async function startWorker() {
   await subscriber.connect();
-  await subscriber.subscribe('matchmaking:new_player', async (message) => {
+  await subscriber.subscribe(MatchmakingRedisKeys.MATCHMAKING_NEW_PLAYER, async (message) => {
     const player = JSON.parse(message);
     console.log(`🔔 Новый игрок в матчмейкинге: ${player.id}`);
     await findMatchForPlayer(player);

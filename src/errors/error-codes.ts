@@ -1,10 +1,11 @@
-export const AuthErrorCodes = {
+export const PlayerErrorCodes = {
   INVALID_CREDENTIALS: 1,
   TOKEN_REQUIRED: 2,
   ACCESS_DENIED: 3,
   USERNAME_TAKEN: 4,
   USER_NOT_FOUND: 5,
   TOKEN_INVALID: 6,
+  ALREADY_IN_QUEUE: 7,
 } as const;
 
 export const CardErrorCodes = {

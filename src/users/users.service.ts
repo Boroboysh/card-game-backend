@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import * as bcrypt from 'bcrypt';
 import { CustomErrorException } from '../errors/custom-error.exception';
-import { AuthErrorCodes, DeckErrorCodes } from '../errors/error-codes';
+import { PlayerErrorCodes, DeckErrorCodes } from '../errors/error-codes';
 
 @Injectable()
 export class UsersService {
@@ -12,7 +12,7 @@ export class UsersService {
     const existingUser = await this.prisma.user.findUnique({ where: { username } });
 
     if (existingUser) {
-      throw new CustomErrorException(AuthErrorCodes.USERNAME_TAKEN, 'Username is already taken.');
+      throw new CustomErrorException(PlayerErrorCodes.USERNAME_TAKEN, 'Username is already taken.');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
