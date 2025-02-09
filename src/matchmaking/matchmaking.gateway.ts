@@ -16,6 +16,16 @@ export class MatchmakingGateway extends EventEmitter implements OnGatewayDisconn
     super();
   }
 
+  handleDisconnect(@ConnectedSocket() client: Socket) {
+    const playerId = this.getPlayerIdFromSocket(client);
+
+    if (playerId) {
+      console.log(`Игрок ${playerId} отключился.`);
+      this.matchmakingService.removePlayerFromQueue(playerId);
+    }
+  }
+
+
   @SubscribeMessage(MatchmakingSocketEvents.PingResponse)
   handlePingResponse(@ConnectedSocket() client: Socket) {
     const playerId = this.getPlayerIdFromSocket(client);
@@ -26,7 +36,7 @@ export class MatchmakingGateway extends EventEmitter implements OnGatewayDisconn
   }
 
   @SubscribeMessage(MatchmakingSocketEvents.QueueDisconnect)
-  async handleDisconnect(@ConnectedSocket() client: Socket) {
+  async handleQueueDisconnect(@ConnectedSocket() client: Socket) {
     const playerId = this.getPlayerIdFromSocket(client);
 
     if (playerId) {
