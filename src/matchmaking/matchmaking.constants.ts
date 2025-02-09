@@ -1,4 +1,5 @@
 export const MATCHMAKING_THRESHOLD = 80; // Минимальный score для матча
+export const MMR_STEP = 200; // Шаг группировки MMR (размер диапазона)
 
 // Начальные "веса" критериев
 export const INITIAL_WEIGHTS = {
