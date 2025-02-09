@@ -31,7 +31,7 @@ export class MatchmakingGateway extends EventEmitter implements OnGatewayDisconn
     const playerId = this.getPlayerIdFromSocket(client);
     if (playerId) {
       console.log(`Игрок ${playerId} подтвердил, что он в сети.`);
-      this.emit(`ping_response:${playerId}`); // Сообщаем MatchmakingService
+      this.emit(`${MatchmakingSocketEvents.PingResponsePlayer}${playerId}`); // Сообщаем MatchmakingService
     }
   }
 
@@ -89,7 +89,7 @@ export class MatchmakingGateway extends EventEmitter implements OnGatewayDisconn
   }
 
   emitMatchFound(battleId: string, players: any[]) {
-    // curent format battleId - `battle_${player.id}_${opponent.id}`
+    // current format battleId - `battle_${player.id}_${opponent.id}`
     this.server.emit(MatchmakingSocketEvents.MatchFound, { battleId, players });
   }
 
